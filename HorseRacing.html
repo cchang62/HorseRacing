@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<body>
+<pre>
+	--題目： 賽馬資料統計--
+	
+	賽馬程式(馬匹數量必須可以調整)
+
+	6匹馬於1200公尺的場地進行速度競賽；
+	每跑完一圈時，每一匹馬速度會減慢3公尺/小時；
+	在跑完3圈(共3600公尺)後，請列出所有馬匹基本資料，並求出最快、最慢馬匹所花費總時間及每匹馬的平均速度各為多少。
+	(花費時間及平均速度皆需求到小數點第二位)
+
+	馬匹基本資料如下:
+	編號：1~6(依照馬匹數量而定)
+	性別：公、母(可用0、1代替)
+	馬匹高度：200~300(公分)
+	馬匹體重：500~700(公斤)
+	速度：25~45公尺/小時
+	
+</pre> 
+
+<p>Get Horse Records</p>
+<button onclick="refresh()">Refresh</button>
+<p id="Result">Result</p>
+<table id="demo">
+  
+</table>
+
+<script>
+	var Horse;
+	var HorseAmount = 6;
+	var RoundAmount = 3;    //The max is 7
+   
+	function averageSpeed(){
+		for(i=0;i<HorseAmount;i++){
+			var tempSpeed=0;
+			var tempTotalSpeed=0;
+			var tempTotalTime=0.0;
+			for(j=0;j<RoundAmount;j++){	//the amount of round is 3, and each round is 1200m. 
+				tempSpeed=Horse[i].Speed-(RoundAmount*j);
+				Horse[i].recordTimePerRoundArr[j]=(1200/tempSpeed).toFixed(2);
+				Horse[i].recordSpeedPerRoundArr[j]=tempSpeed;
+				tempTotalSpeed+=tempSpeed;
+				//tempTotalTime+=(1200/tempSpeed).toFixed(2);  //toFixed covert to string.
+				tempTotalTime+=(1200/tempSpeed);
+			}
+			Horse[i].HorseAveSpeed=(tempTotalSpeed/RoundAmount);
+			//console.log(typeof tempTotalTime.toFixed(2));  //string
+			Horse[i].TotalTime = parseFloat(tempTotalTime.toFixed(2));  //float
+			//console.log(typeof Horse[i].TotalTime);			
+		}
+	}
+   
+    function genHorse(){
+		var horseArr=[];
+		for(i=0;i<HorseAmount;i++){
+			horseArr[i] = {
+				No:i+1, 
+				Gender:getRandomInt(0, 1), 
+				Height:getRandomInt(200, 300), 
+				Weight:getRandomInt(500, 700), 
+				Speed:getRandomInt(25, 45),
+				recordTimePerRoundArr:[],
+				recordSpeedPerRoundArr:[],
+				HorseAveSpeed:0,
+				TotalTime:0
+			}
+		}
+		return horseArr;
+	}
+   
+	function getRandomInt(min, max){
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	
+	function IsFastestOrSlowest(booFastest){
+		var arrTTime=[]; 
+		var getFastestHorseIdx=0;
+		var getSlowestHorseIdx=0;
+		for(i=0;i<HorseAmount;i++){
+			arrTTime[i] = Horse[i].TotalTime;
+		}
+		
+		if(booFastest){
+			//return Math.min(arrTTime);
+			var tempMinTime=arrTTime.min();
+			return "{ Horse_No "+getHorseIdx(tempMinTime)+", Total_Speed: "+tempMinTime+" }";
+		}
+		else{
+			//return Math.max(arrTTime);
+			var tempMaxTime=arrTTime.max();
+			return "{ Horse_No: "+getHorseIdx(tempMaxTime)+", Total_Speed: "+tempMaxTime+" }";
+		}
+		
+	}
+	
+	function getHorseIdx(timeVal){
+		for(i=0;i<HorseAmount;i++){
+			if(Horse[i].TotalTime==timeVal){return Horse[i].No}
+		}
+	}
+	
+	Array.prototype.max = function() {
+	  return Math.max.apply(null, this);
+	};
+
+	Array.prototype.min = function() {
+	  return Math.min.apply(null, this);
+	};
+	
+	function show(){
+		Horse=genHorse();
+		averageSpeed();
+		
+		var tempContent="<tr><th>No.</th><th>Gender</th><th>Height</th><th>Weight</th><th>Spd</th><th>AverSpd</th><th>Time(hr)</th></tr>";
+		for(i=0;i<Horse.length;i++){
+			tempContent+="<tr><td>"+Horse[i].No+"</td><td>"
+						+(Horse[i].Gender==1?'M':'F')+"</td><td>"
+						+Horse[i].Height+"</td><td>"
+						+Horse[i].Weight+"</td><td>"
+						+Horse[i].Speed+"</td><td>"
+						+Horse[i].HorseAveSpeed+"</td><td>"
+						+Horse[i].TotalTime+"</td></tr>";
+		}
+		return tempContent+"<tr><td colspan='7'>Champion---</td></tr><tr><td colspan='2'>Fastest: </td><td colspan='5'>"+IsFastestOrSlowest(true)+"</td></tr>"+"<tr><td colspan='2'> Slowest: </td><td colspan='5'>"+IsFastestOrSlowest(false)+"</td></tr>";
+		console.log(Horse);
+		console.log("Fastest: "+IsFastestOrSlowest(true)+", Slowest: "+IsFastestOrSlowest(false));
+	}
+	
+	function refresh(){
+		document.getElementById("Result").innerHTML = "Result\\ Horce: " + HorseAmount + " Unit(s), Round: " + RoundAmount + " Unit(s)/1200m ";   
+		document.getElementById("demo").innerHTML = show();
+	}
+
+</script>
+
+</body>
+</html>
